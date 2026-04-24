@@ -21,6 +21,9 @@ function ProductsList() {
     async function getProducts(){
       try{
         let res=await fetch("/api/products?limit=100")
+        if(res.status===404){
+          res=await fetch("https://dummyjson.com/products?limit=100")
+        }
         if(res.ok){
           let productsData=await res.json();
           const normalizedProducts = (productsData.products || []).map((product) => ({
@@ -31,6 +34,9 @@ function ProductsList() {
         }else{
           if(res.status===429){
             throw new Error("The free products API rate limit was hit (429). Please try again shortly.")
+          }
+          if(res.status===404){
+            throw new Error("Products API route not found (404). Please restart Vite dev server if running locally.")
           }
           throw new Error(`Failed to fetch products (${res.status}).`)
         }
