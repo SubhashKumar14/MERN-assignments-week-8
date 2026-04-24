@@ -20,13 +20,17 @@ function ProductsList() {
     setLoading(true);
     async function getProducts(){
       try{
-        let res=await fetch("/api/products")
+        let res=await fetch("/api/products?limit=100")
         if(res.ok){
           let productsData=await res.json();
-          setProducts(productsData);
+          const normalizedProducts = (productsData.products || []).map((product) => ({
+            ...product,
+            image: product.thumbnail || product.images?.[0] || '',
+          }));
+          setProducts(normalizedProducts);
         }else{
-          if(res.status===523){
-            throw new Error("Fake Store API is temporarily unavailable (523). Please try again shortly.")
+          if(res.status===429){
+            throw new Error("The free products API rate limit was hit (429). Please try again shortly.")
           }
           throw new Error(`Failed to fetch products (${res.status}).`)
         }
