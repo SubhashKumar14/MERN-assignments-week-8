@@ -1,53 +1,40 @@
-import { createBrowserRouter,RouterProvider, Navigate} from 'react-router'
-import RootLayout from "./components/RootLayout"
-import Header from "./components/Header"
-import Footer from "./components/Footer"
-import Home from "./components/Home"
-import ProductsList from "./components/ProductsList"
-import ContactUs from './components/ContactUs'
-import Contacts from './components/Contacts'
-import Product from './components/Product'
-
+import RootLayout from './components/RootLayout'
+import { createBrowserRouter } from 'react-router'
+import { RouterProvider } from 'react-router'
+import Home from './components/Home'
+import User from './components/User'
+import UserList from './components/UserList'
+import AddUser from './components/AddUser'
 function App() {
-
-  //routing configuration
-  const routingObj=createBrowserRouter([
-    {
-      path:"/",
-      element:<RootLayout/>,
-      children:[
+    const routerObj = createBrowserRouter([
         {
-          path:"/",
-          element:<Home/>
-        },
-        {
-          path:"productslist",
-          element:<ProductsList/>
-        },
-        {
-          path:"products",
-          element:<Product/>
-        },
-        {
-          path:"contactus",
-          element:<ContactUs/>,
-          children:
-            [
-              {
-              path:"contacts",
-              element:<Contacts/>
-              }
+            path:"/",
+            element:<RootLayout/>,
+            children:[
+                {
+                    index: true,
+                    element:<Home/>
+                },
+                {
+                    path:"user",
+                    element:<User/>
+                },
+                {
+                    path:"userslist",
+                    element:<UserList/>
+                },
+                {
+                    path:"adduser",
+                    element:<AddUser/>
+                }
             ]
-        },
-        {
-          path:"*",
-          element:<Navigate to="/" replace/>
         }
-      ]
-    }
-  ])
-
-  return <RouterProvider router={routingObj}/>
+    ])
+    return (
+        <div>
+            <RouterProvider router={routerObj}/>
+        </div>
+    )
 }
 
 export default App

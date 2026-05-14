@@ -1,27 +1,51 @@
-import React from 'react'
-import { NavLink } from 'react-router'
+import { NavLink } from "react-router";
+
+const navLinkClass = ({ isActive }) => {
+  const base = "rounded-md px-3 py-2 text-sm font-medium";
+  return isActive
+    ? `${base} bg-blue-600 text-white`
+    : `${base} text-gray-700 hover:bg-gray-100`;
+};
 
 function Header() {
   return (
+    <header className="border-b border-gray-200 bg-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <NavLink to="/" className="flex items-center gap-3">
+          <img
+            className="h-10 w-10 rounded-full object-cover"
+            src="https://thumbs.dreamstime.com/b/creative-simple-dragons-silhouettes-logo-stylized-vector-illustrations-simple-dragons-silhouettes-logo-130475058.jpg"
+            alt="App logo"
+          />
+          <span className="text-base font-semibold text-gray-900 sm:text-lg">
+            User Management
+          </span>
+        </NavLink>
 
-    <div className='flex justify-between px-10 items-center bg-gray-300'>
-      <img width="80px"
-      className='p-2 rounded-full'
-      src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4RMKKKXbQaaVk_Ny8Ya5gLA5H1_WIDyTWcA&s'
-      alt='' />
-      <ul className='flex gap-10 text-2xl'>
-        <li>
-          <NavLink to="" className={({isActive})=>isActive ? "text-blue-100 bg-blue-500 p-2":""}>Home</NavLink>
-        </li>
-        <li>
-          <NavLink to="productslist" className={({isActive})=>isActive ? "text-blue-100 bg-blue-500 p-2":""}>ProductsList</NavLink>
-        </li>
-        <li>
-          <NavLink to="contactus" className={({isActive})=>isActive ? "text-blue-100 bg-blue-500 p-2":""}>ContactUs</NavLink>
-        </li>
-      </ul>
-    </div>
-  )
+        <nav aria-label="Primary">
+          <ul className="flex items-center gap-1 sm:gap-2">
+            <li>
+              <NavLink to="/" end className={navLinkClass}>
+                Home
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/adduser" className={navLinkClass}>
+                Add User
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/userslist" className={navLinkClass}>
+                Users List
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
 }
 
-export default Header
+export default Header;
