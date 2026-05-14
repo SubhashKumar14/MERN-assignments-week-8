@@ -1,0 +1,15 @@
+### GET users
+GET http://localhost:5000/user-api/users
+
+###
+
+### POST new user
+POST http://localhost:5000/user-api/users
+Content-Type: application/json
+
+{
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "dateOfBirth": "1995-10-10",
+    "mobileNumber": 9876543210
+}
