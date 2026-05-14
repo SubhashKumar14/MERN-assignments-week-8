@@ -1,11 +1,12 @@
 const express = require('express');
-const User = require('../models/userModel');
 const userApp = express.Router();
+
+// simulated database (in-memory array)
+let users = [];
 
 // GET all users
 userApp.get('/users', async (req, res) => {
   try {
-    const users = await User.find({});
     res.status(200).send({ message: "Users fetched successfully", payload: users });
   } catch (err) {
     console.error("Error in fetching users", err);
@@ -16,8 +17,8 @@ userApp.get('/users', async (req, res) => {
 // POST new user
 userApp.post('/users', async (req, res) => {
   try {
-    const newUser = new User(req.body);
-    await newUser.save();
+    const newUser = { ...req.body, _id: Date.now().toString() };
+    users.push(newUser);
     res.status(201).send({ message: "User created successfully", payload: newUser });
   } catch (err) {
     console.error("Error creating user", err);
