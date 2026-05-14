@@ -17,7 +17,8 @@ function AddUser() {
     setError(null);
     //make api call to create user
     try {
-      let res = await fetch("http://localhost:5000/user-api/users", {
+      let apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      let res = await fetch(`${apiUrl}/user-api/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
