@@ -1,5 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+
+const USERS_STORAGE_KEY = "user-management.users";
+
+function getStoredUsers() {
+    try {
+        const raw = localStorage.getItem(USERS_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
 function UserList() {
     let [users, setUsers] = useState([]);
     let [loading, setLoading] = useState(true);
@@ -14,18 +28,28 @@ function UserList() {
             setError(null);
 
             try {
-                let apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-                let res = await fetch(`${apiUrl}/user-api/users`, {
-                    method: "GET",
-                });
+                const apiUrl = import.meta.env.VITE_API_URL;
 
-                if (res.status === 200) {
-                    let resObj = await res.json();
-                    if (isMounted) {
-                        setUsers(resObj?.payload ?? []);
+                // If backend is configured, use API. Otherwise use localStorage.
+                if (apiUrl) {
+                    let res = await fetch(`${apiUrl}/user-api/users`, {
+                        method: "GET",
+                    });
+
+                    if (res.status === 200) {
+                        let resObj = await res.json();
+                        if (isMounted) {
+                            setUsers(resObj?.payload ?? []);
+                        }
+                        return;
                     }
-                } else {
+
                     throw new Error("Error in fetching users");
+                }
+
+                const storedUsers = getStoredUsers();
+                if (isMounted) {
+                    setUsers(storedUsers);
                 }
             } catch (err) {
                 console.log(err);

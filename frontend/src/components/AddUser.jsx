@@ -1,6 +1,31 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { useState } from "react";
+
+const USERS_STORAGE_KEY = "user-management.users";
+
+function getStoredUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function setStoredUsers(users) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function createId() {
+  if (typeof crypto !== "undefined" && crypto?.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function AddUser() {
   const {
     register,
@@ -15,26 +40,33 @@ function AddUser() {
   const onUserCreate = async (newUser) => {
     setLoading(true);
     setError(null);
-    //make api call to create user
     try {
-      let apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      let res = await fetch(`${apiUrl}/user-api/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newUser),
-      });
+      const apiUrl = import.meta.env.VITE_API_URL;
 
-      if (res.status === 201) {
-        //user created navigate to user list page
-        navigate("/userslist");
-      }
-      //if error in creating user show error message
-      else {
+      // If backend is configured, use API. Otherwise use localStorage.
+      if (apiUrl) {
+        let res = await fetch(`${apiUrl}/user-api/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newUser),
+        });
+
+        if (res.status === 201) {
+          navigate("/userslist");
+          return;
+        }
+
         console.log(res);
         throw new Error("Error in creating user");
       }
+
+      const users = getStoredUsers();
+      const storedUser = { ...newUser, _id: createId() };
+      users.push(storedUser);
+      setStoredUsers(users);
+      navigate("/userslist");
     } catch (err) {
       console.log(err);
       setError(err);
