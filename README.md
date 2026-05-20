@@ -1,32 +1,84 @@
-# User Management App (MERN Week 8)
+# User Management Website
 
-A simple **User Management** project built as part of my MERN assignments. It includes a React frontend (Vite) and an optional Express backend.
+A small user management website built with **React** that lets you add users, view a user list, and open a user details page.
 
-## What this repo contains
+## Website features
 
-- **Frontend**: Add a user, list users, and view user details (React Router pages).
-- **Two data modes**
-    - **LocalStorage mode (default)**: Works without any backend/database.
-    - **API mode (optional)**: If you set `VITE_API_URL`, the app will use a backend API.
+- **Add User** form with validation
+- **Users List** page with loading / empty / error states
+- **User Details** page (opens when you click a user)
+- **Responsive UI** (cards + grid)
+- Works in **two modes**:
+    - **LocalStorage mode (no backend)**: data is saved in the browser
+    - **API mode (optional backend)**: data is fetched/saved through an Express API
 
-## Tech stack
+## Frontend concepts used
 
-- React + Vite
-- React Router
-- Tailwind CSS
-- react-hook-form
-- (Optional) Node.js + Express
+- **React component architecture**
+    - Page components like Users List, Add User, and User Details
+    - Local UI state using `useState`
 
-## Project structure
+- **React Router (SPA routing)**
+    - Nested routes with a shared layout (header/footer)
+    - Navigation using `NavLink`
+    - Programmatic navigation using `useNavigate`
+    - Passing selected user data to the details page using `useLocation().state`
 
-```
-frontend/   # React app (Vite)
-backend/    # Express API (optional)
-```
+- **Form handling with react-hook-form**
+    - `register()` fields
+    - `handleSubmit()` for form submission
+    - Showing validation errors in the UI
 
-## Run locally
+- **Conditional rendering for a better UX**
+    - Shows loading while data is being loaded
+    - Shows a friendly message when there are no users
+    - Shows an error message if something fails
 
-### 1) Frontend
+- **Local persistence with localStorage (when no backend is used)**
+    - Stores users under: `user-management.users`
+    - Uses JSON `stringify/parse` to save/load arrays
+    - Generates a simple client-side id for each stored user
+
+- **Environment variables (Vite)**
+    - Uses `import.meta.env.VITE_API_URL`
+    - If `VITE_API_URL` exists → uses API mode
+    - If it does not exist → uses LocalStorage mode
+
+- **Styling with Tailwind CSS**
+    - Utility-first styling and responsive layout
+    - Reusable UI classes (buttons, cards, fields)
+
+## Backend concepts used (optional)
+
+> The backend is optional. The website can work fully without it.
+
+- **Express server** with a separate router module
+- **Middleware**
+    - `cors()` to allow cross-origin requests
+    - `express.json()` to read JSON request bodies
+- **REST API design**
+    - `GET /user-api/users` → returns `{ message, payload }`
+    - `POST /user-api/users` → creates a user and returns `{ message, payload }`
+- **Status codes**
+    - `200` for successful fetch
+    - `201` for successful create
+    - `500` for server errors
+- **In-memory storage** for demo purposes (data resets on server restart)
+- **PORT configuration** using `process.env.PORT || 5000`
+
+## How the website stores data
+
+- **LocalStorage mode** (default):
+    - Add User → saves into localStorage → navigates to Users List
+    - Users List → reads from localStorage
+
+- **API mode** (when `VITE_API_URL` is set):
+    - Add User → `POST {VITE_API_URL}/user-api/users`
+    - Users List → `GET {VITE_API_URL}/user-api/users`
+
+## Run the website locally (quick)
+
+### Frontend
 
 ```bash
 cd frontend
@@ -34,9 +86,7 @@ npm install
 npm run dev
 ```
 
-### 2) Backend (optional)
-
-> The backend is **not required** if you want LocalStorage mode.
+### Backend (only if you want API mode)
 
 ```bash
 cd backend
@@ -44,49 +94,12 @@ npm install
 npm run dev
 ```
 
-Backend runs on `http://localhost:5000` by default.
-
-## LocalStorage mode (no backend)
-
-If `VITE_API_URL` is **not** set, the app stores users in the browser under:
-
-- `localStorage` key: `user-management.users`
-
-To inspect it:
-
-1. Open DevTools → **Application** → **Local Storage**
-2. Select your site origin (domain)
-3. Find `user-management.users`
-
-## API mode (connect frontend to backend)
-
-Create a file `frontend/.env`:
+To enable API mode locally, set this in `frontend/.env`:
 
 ```bash
 VITE_API_URL=http://localhost:5000
 ```
 
-Restart the frontend dev server after changing `.env`.
+## Deployment note (SPA refresh)
 
-### API endpoints
-
-- `GET /user-api/users` → returns `{ payload: [...] }`
-- `POST /user-api/users` → creates a user (in-memory)
-
-> Note: the backend currently uses an **in-memory** array, so data resets when the server restarts.
-
-## Deployment notes
-
-### Vercel (frontend)
-
-- Set the **Root Directory** to `frontend`.
-- SPA refresh (e.g. `/adduser`, `/userslist`) is handled by `frontend/vercel.json`.
-- If you want **LocalStorage mode** in production, make sure `VITE_API_URL` is **not** set in Vercel Environment Variables.
-
-### Render (backend)
-
-You can deploy the backend as a web service. The server listens on `process.env.PORT`.
-
-## Notes (concept)
-
-**State management** means sharing and syncing state across the application (for example between different components/pages).
+For deployments like Vercel, refreshing routes like `/adduser` or `/userslist` needs an SPA rewrite. This project includes it in `frontend/vercel.json`.
