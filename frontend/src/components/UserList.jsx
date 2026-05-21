@@ -28,23 +28,26 @@ function UserList() {
             setError(null);
 
             try {
-                const apiUrl = import.meta.env.VITE_API_URL;
+                const apiUrl = import.meta.env.VITE_API_URL?.trim();
 
-                // If backend is configured, use API. Otherwise use localStorage.
                 if (apiUrl) {
-                    let res = await fetch(`${apiUrl}/user-api/users`, {
-                        method: "GET",
-                    });
+                    try {
+                        const res = await fetch(`${apiUrl}/user-api/users`, {
+                            method: "GET",
+                        });
 
-                    if (res.status === 200) {
-                        let resObj = await res.json();
-                        if (isMounted) {
-                            setUsers(resObj?.payload ?? []);
+                        if (res.ok) {
+                            const resObj = await res.json();
+                            if (isMounted) {
+                                setUsers(resObj?.payload ?? []);
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    throw new Error("Error in fetching users");
+                        throw new Error("Error in fetching users");
+                    } catch (apiError) {
+                        console.warn("Backend unavailable, loading users locally.", apiError);
+                    }
                 }
 
                 const storedUsers = getStoredUsers();
@@ -53,9 +56,6 @@ function UserList() {
                 }
             } catch (err) {
                 console.log(err);
-                if (isMounted) {
-                    setError(err);
-                }
             } finally {
                 if (isMounted) {
                     setLoading(false);
@@ -106,7 +106,7 @@ function UserList() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {users?.map((userObj) => (
                         <div
-                            key={userObj.email}
+                            key={userObj._id ?? userObj.email}
                             className="card cursor-pointer hover:border-gray-300"
                             onClick={() => goToUser(userObj)}
                             role="button"

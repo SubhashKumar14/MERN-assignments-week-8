@@ -19,6 +19,14 @@ function setStoredUsers(users) {
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 }
 
+function saveUserLocally(newUser) {
+  const users = getStoredUsers();
+  const storedUser = { ...newUser, _id: createId() };
+  users.push(storedUser);
+  setStoredUsers(users);
+  return storedUser;
+}
+
 function createId() {
   if (typeof crypto !== "undefined" && crypto?.randomUUID) {
     return crypto.randomUUID();
@@ -41,35 +49,37 @@ function AddUser() {
     setLoading(true);
     setError(null);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = import.meta.env.VITE_API_URL?.trim();
 
-      // If backend is configured, use API. Otherwise use localStorage.
       if (apiUrl) {
-        let res = await fetch(`${apiUrl}/user-api/users`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newUser),
-        });
+        try {
+          const res = await fetch(`${apiUrl}/user-api/users`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newUser),
+          });
 
-        if (res.status === 201) {
+          if (res.ok) {
+            navigate("/userslist");
+            return;
+          }
+
+          throw new Error("Error in creating user");
+        } catch (apiError) {
+          console.warn("Backend unavailable, saving user locally.", apiError);
+          saveUserLocally(newUser);
           navigate("/userslist");
           return;
         }
-
-        console.log(res);
-        throw new Error("Error in creating user");
       }
 
-      const users = getStoredUsers();
-      const storedUser = { ...newUser, _id: createId() };
-      users.push(storedUser);
-      setStoredUsers(users);
+      saveUserLocally(newUser);
       navigate("/userslist");
     } catch (err) {
       console.log(err);
-      setError(err);
+      setError(err instanceof Error ? err : new Error("Error in creating user"));
     } finally {
       setLoading(false);
     }
